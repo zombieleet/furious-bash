@@ -1,5 +1,5 @@
 source ../assert-unit/testify.bash
-source benchmark.sh
+source furious.sh
 
 
 
@@ -11,6 +11,9 @@ bMark add builtinList "builtin"
 bMark add lsStyle "lsstyle"
 
 bMark run
-bMark complete cc
+#bMark complete cc
 
-assert expect "$(bMark pluck 'fastest')" "lsstyle" "Test for Fastest Runner" "This should pass"
+assert expect "$(bMark pluck 'fastest')" "lsstyle" "Test for Fastest Runner" "This should fail"
+
+assert expect "$(bMark pluck 'fastest')" "builtin" "Test for Fastest Runner" "This test should pass"
+assert done
