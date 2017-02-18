@@ -102,17 +102,35 @@ bMark() {
 		    local result;
 		    
 		    for i in "${pushTimeRun[@]}";do
-			echo -e "\n\n$i -- master\n\n"
+
 			for j in "${pushTimeRun[@]}";do
-			    echo "$j -- slave"
-			    sleep 2
-			    local __bcResult=$( bc <<<"${i} <= ${j}" );
+
+			    [[ $i == $j ]] && continue ;
+
+			    local __bcResult=$( bc <<<"${i} < ${j}" );
+
 			    (( __bcResult )) && {
-				for x in "${temp_array[@]}";do
-				    timeRun=${x} ; timeRun="${i##*)}"
+
+				
+				[[ ! -z  "${res}" ]] && {
 				    
-				    if [[ ${i} =~ ${timeRun} ]];then
-					
+				    local __test=$(bc <<<"${res} <= ${i}")
+				    
+				    (( __test )) && {
+					break;
+				    }
+				}
+				
+				local res="$i"
+				
+				for x in "${temp_array[@]}";do
+				    
+				    timeRun=${x} ; timeRun="${timeRun##*)}" ; timeRun="${timeRun//[ms]/}"
+
+				    local __final=$( bc <<<"${res} == ${timeRun}" )
+
+				    (( __final )) && {
+
 					local nameOfRunner="${x}"
 					
 					nameOfRunner="${nameOfRunner%%)*}"; nameOfRunner="${nameOfRunner##*(}"
@@ -121,17 +139,24 @@ bMark() {
 					
 					#result="${timeRun} ${nameOfRunner}"
 					result="${nameOfRunner}"
-				    fi
+				    }
 				done
+
+
+				
+			    } || {
+				break;
 			    }
 			done
 
 		    done
 
 		    echo $result
-		    
+		    #echo $res
 		;;
 		slowest)
+		;;
+		\unset)
 		;;
 		*)
 		    printf "Invalid type to extract options allowed are [fastest | slowest]\n"
@@ -142,35 +167,40 @@ bMark() {
 
 
 
-a() {
+seqLoop() {
     for i in `seq 1 1000`;do
 	echo $i;
     done    
-
+    
 }
-c() {
-
+cstyleLoop() {
+    for ((i=0;i<=1000;i=i+1)) {
+	    echo $i;
+	}
+	
+}
+builtinLoop() {
+    
     for i in {1..1000};do
 	echo $i
     done
 }
-d() {
-    for ((i=0;i<=1000;i=i+1)) {
-	    echo $i;
-	}
-}
+
 cc() {
     for i ;do
 	echo $i
     done
 }
 
-bMark add c 'seq'
-bMark add d 'c'
-bMark add a 'builtin'
 
-bMark run
-bMark complete cc
+builtinList() {
+    for i in *;do
+	echo $i
+    done
+}
 
-bMark pluck 'fastest'
-
+lsStyle() {
+    for i in $(ls);do
+	echo $i
+    done
+}
