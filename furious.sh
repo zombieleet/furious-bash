@@ -1,6 +1,75 @@
 #/usr/bin/env bash
 #set -x
 
+extract() {
+    
+    local op="${1}"
+    local pushTimeRun
+    
+    for i in "${temp_array[@]}";do
+	local timeRun=${i} ; timeRun="${i##*)}"; timeRun="${timeRun//[ ms]/}"
+	pushTimeRun+=( ${timeRun} );
+    done
+    
+    
+    local result;
+    
+    for i in "${pushTimeRun[@]}";do
+	
+	for j in "${pushTimeRun[@]}";do
+	    
+	    [[ $i == $j ]] && continue ;
+	    
+	    local __bcResult=$( bc <<<"${i} $op ${j}" );
+	    
+	    (( __bcResult )) && {
+		
+		
+		[[ ! -z  "${res}" ]] && {
+		    
+		    local __test=$(bc <<<"${res} $op= ${i}")
+		    
+		    (( __test )) && {
+			break;
+		    }
+		}
+		
+		local res="$i"
+		
+		for x in "${temp_array[@]}";do
+		    
+		    timeRun=${x} ; timeRun="${timeRun##*)}" ; timeRun="${timeRun//[ms]/}"
+		    
+		    local __final=$( bc <<<"${res} == ${timeRun}" )
+		    
+		    (( __final )) && {
+			
+			local nameOfRunner="${x}"
+			
+			nameOfRunner="${nameOfRunner%%)*}"; nameOfRunner="${nameOfRunner##*(}"
+			
+			timeRun="${x##*)}"
+			
+			#result="${timeRun} ${nameOfRunner}"
+			result="${nameOfRunner}"
+		    }
+		done
+		
+		
+		
+	    } || {
+		break;
+	    }
+	done
+	
+    done
+    
+    echo $result
+    #echo $res
+    
+}
+
+
 bMark() {
     local subComm=$1
     
@@ -91,116 +160,20 @@ bMark() {
 	    
 	    case $extractType in
 		fastest)
-		    local pushTimeRun
-		    
-		    for i in "${temp_array[@]}";do
-			local timeRun=${i} ; timeRun="${i##*)}"; timeRun="${timeRun//[ ms]/}"
-			pushTimeRun+=( ${timeRun} );
-		    done
-
-
-		    local result;
-		    
-		    for i in "${pushTimeRun[@]}";do
-
-			for j in "${pushTimeRun[@]}";do
-
-			    [[ $i == $j ]] && continue ;
-
-			    local __bcResult=$( bc <<<"${i} < ${j}" );
-
-			    (( __bcResult )) && {
-
-				
-				[[ ! -z  "${res}" ]] && {
-				    
-				    local __test=$(bc <<<"${res} <= ${i}")
-				    
-				    (( __test )) && {
-					break;
-				    }
-				}
-				
-				local res="$i"
-				
-				for x in "${temp_array[@]}";do
-				    
-				    timeRun=${x} ; timeRun="${timeRun##*)}" ; timeRun="${timeRun//[ms]/}"
-
-				    local __final=$( bc <<<"${res} == ${timeRun}" )
-
-				    (( __final )) && {
-
-					local nameOfRunner="${x}"
-					
-					nameOfRunner="${nameOfRunner%%)*}"; nameOfRunner="${nameOfRunner##*(}"
-					
-					timeRun="${x##*)}"
-					
-					#result="${timeRun} ${nameOfRunner}"
-					result="${nameOfRunner}"
-				    }
-				done
-
-
-				
-			    } || {
-				break;
-			    }
-			done
-
-		    done
-
-		    echo $result
-		    #echo $res
+		    extract "<"
 		;;
 		slowest)
+		    extract ">"
 		;;
-		\unset)
-		;;
+		
 		*)
 		    printf "Invalid type to extract options allowed are [fastest | slowest]\n"
 	    esac
 	    ;;
+	\unset)
+	    unset BENCHMARKS
+	    unset temp_array
+	    ;;
     esac
 }
 
-
-
-seqLoop() {
-    for i in `seq 1 1000`;do
-	echo $i;
-    done    
-    
-}
-cstyleLoop() {
-    for ((i=0;i<=1000;i=i+1)) {
-	    echo $i;
-	}
-	
-}
-builtinLoop() {
-    
-    for i in {1..1000};do
-	echo $i
-    done
-}
-
-cc() {
-    for i ;do
-	echo $i
-    done
-}
-
-
-builtinList() {
-    for i in *;do
-	echo $i
-    done
-}
-
-lsStyle() {
-    for i in $(ls);do
-	echo $i
-    done
-}
