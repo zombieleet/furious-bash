@@ -1,78 +1,76 @@
 source ./testify.bash
-source ./furious.sh
-
-
-
-
-
+source ./furious.bash
 
 seqLoop() {
     for i in `seq 1 1000`;do
-	echo $i;
-    done    
-    
+    echo $i;
+    done
+
 }
 cstyleLoop() {
     for ((i=0;i<=1000;i=i+1)) {
-	    echo $i;
-	}
-	
+        echo $i;
+    }
+
 }
 builtinLoop() {
-    
+
     for i in {1..1000};do
-	echo $i
+    echo $i
     done
 }
 
 cc() {
     for i ;do
-	echo $i
+    echo $i
     done
 }
 
 
 builtinList() {
     for i in *;do
-	echo $i
+    echo $i
     done
 }
 
 lsStyle() {
     for i in $(ls);do
-	echo $i
+    echo $i
     done
 }
 
 
-bMark add seqLoop "seq"
-bMark add cstyleLoop "cstyle"
-bMark add builtinLoop "builtin"
+furious add seqLoop "seq"
+furious add cstyleLoop "cstyle"
+furious add builtinLoop "builtin"
 
-bMark run
-bMark complete cc
+furious run
+# furious complete cc
 printf "slowest  "
-bMark pluck slowest
+furious pluck slowest
 
 printf "fastest "
-bMark pluck fastest
+furious pluck fastest
 
-bMark unset
+assert expect "$(furious pluck 'fastest')" "builtin" "Test for Fastest Runner" "This test should pass"
+assert expect "$(furious pluck 'slowest')" "cstyle" "Test for Slowest Runner" "This test should pass"
 
-bMark add builtinList "builtin"
-bMark add lsStyle "lsstyle"
+furious unset
 
-bMark run
+furious add builtinList "builtin"
+furious add lsStyle "lsstyle"
 
-bMark complete cc
+furious run
+
+# furious complete cc
 
 printf "slowest  "
-bMark pluck slowest
+furious pluck slowest
 
 printf "fastest  "
-bMark pluck fastest
+furious pluck fastest
 
-#assert expect "$(bMark pluck 'fastest')" "lsstyle" "Test for Fastest Runner" "This should fail"
-#assert expect "$(bMark pluck 'fastest')" "builtin" "Test for Fastest Runner" "This test should pass"
+assert expect "$(furious pluck 'fastest')" "builtin" "Test for Fastest Runner" "This should pass"
+assert expect "$(furious pluck 'slowest')" "lsstyle" "Test for Slowest Runner" "This should pass"
 
-#assert done
+assert done
