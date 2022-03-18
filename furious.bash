@@ -161,10 +161,10 @@ furious() {
 	    case $extractType in
 		fastest)
 		    extract "<"
-		;;
+		    ;;
 		slowest)
 		    extract ">"
-		;;
+		    ;;
 
 		*)
 		    printf "Invalid type to extract options allowed are [fastest | slowest]\n"
