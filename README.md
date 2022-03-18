@@ -23,8 +23,7 @@ The add subcommand supports two argument.The first argument is a function name (
 ```bash
 
     function love() {
-        printf "love is a name sex is a game\n"
-        printf "play the game forget the name\n"
+        printf "love???"
     }
 
 ```
